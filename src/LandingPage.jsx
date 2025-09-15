@@ -1,330 +1,255 @@
-import React, { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import { CheckCircle2, Sparkles, Wrench, Rocket, ArrowRight, Shield, Gauge, Workflow, Quote, Building2, Briefcase, ClipboardCheck, BarChart3 } from 'lucide-react'
+/*
+  ModeOps — Production Landing Page (Visual + Mockups, Growth Focus)
+  ------------------------------------------------------
+  Updated messaging: emphasizes efficiency + growth (not just cost‑saving).
+*/
 
-const BRAND = 'ModeOps'
-const CONTACT_EMAIL = 'hello@modeops.com'
-const FORMSPREE_FORM_ID = import.meta.env?.VITE_FORMSPREE_FORM_ID || ''
+import React, { useMemo, useState } from 'react'
 
-function encodeFormData(data) {
-  return new URLSearchParams(data).toString()
+const FORMSPREE_ID = import.meta?.env?.VITE_FORMSPREE_FORM_ID || 'xldwvnvg'
+
+function text(value) {
+  if (value == null) return ''
+  if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') return String(value)
+  try { return JSON.stringify(value) } catch { return String(value) }
 }
 
-// ===== Theme =====
-const COLOR = {
-  bg: '#0b1020',          // deep navy
-  bgSoft: '#0f172a',      // slate/ink
-  text: '#e5e7eb',        // light text
-  textMuted: '#9aa5b1',
-  card: '#0f172a',
-  border: '#1f2937',
-  accent: '#f59e0b',      // amber
-  accentSoft: '#fde68a',
-  white: '#ffffff'
+function Section({ id, children, style }) {
+  return (
+    <section id={id} style={{ padding: '72px 0', ...style }}>
+      {children}
+    </section>
+  )
 }
 
-const styles = {
-  page: {
-    fontFamily: 'Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial',
-    color: COLOR.text,
-    background: `radial-gradient(800px 400px at 10% -10%, #1f2937 0%, transparent 60%), radial-gradient(800px 400px at 110% 10%, #111827 0%, transparent 60%), ${COLOR.bg}`
-  },
-  container: { maxWidth: 1200, margin: '0 auto', padding: '0 24px' },
-  header: {
-    position: 'sticky', top: 0, zIndex: 20,
-    backdropFilter: 'saturate(180%) blur(8px)', background: 'rgba(11,16,32,0.75)',
-    borderBottom: `1px solid ${COLOR.border}`
-  },
-  headerInner: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 0' },
-  nav: { display: 'flex', gap: 18 },
-  navLink: { textDecoration: 'none', color: COLOR.textMuted, fontWeight: 500 },
-  hero: { display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', alignItems: 'center', gap: 28, padding: '64px 0 48px' },
-  badge: { display: 'inline-flex', gap: 8, alignItems: 'center', borderRadius: 999, padding: '6px 10px', background: '#111827', color: COLOR.accentSoft, fontWeight: 700, fontSize: 12, letterSpacing: '.02em', border: `1px solid ${COLOR.border}` },
-  h1: { fontSize: 46, lineHeight: 1.05, margin: '12px 0 10px', letterSpacing: '-.02em' },
-  sub: { fontSize: 18, color: COLOR.textMuted, marginTop: 6 },
-  ctaRow: { display: 'flex', gap: 12, marginTop: 18, flexWrap: 'wrap' },
-  btnPrimary: { padding: '12px 16px', background: COLOR.accent, color: '#111827', borderRadius: 12, textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 8, border: 'none' },
-  btnGhost: { padding: '12px 16px', background: 'transparent', color: COLOR.text, borderRadius: 12, textDecoration: 'none', fontWeight: 700, border: `1px solid ${COLOR.border}` },
-  heroCard: { background: 'linear-gradient(180deg,#0f172a,#111827)', color: COLOR.white, borderRadius: 16, padding: 20, border: `1px solid ${COLOR.border}` },
-  pill: { border: `1px solid ${COLOR.border}`, borderRadius: 12, padding: 12, display: 'flex', alignItems: 'center', gap: 8, background: '#0b1220' },
-  sectionMuted: { background: '#0b1220', padding: '32px 0', borderTop: `1px solid ${COLOR.border}`, borderBottom: `1px solid ${COLOR.border}` },
-  grid3: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 },
-  grid2: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 },
-  card: { background: COLOR.card, border: `1px solid ${COLOR.border}`, borderRadius: 14, padding: 16 },
-  label: { fontSize: 13, color: COLOR.textMuted },
-  contact: { background: '#0a0f1d', color: COLOR.white, padding: '44px 0', borderTop: `1px solid ${COLOR.border}` },
-  input: { padding: 12, borderRadius: 10, border: `1px solid ${COLOR.border}`, background: '#0b1220', color: COLOR.white },
-  textarea: { padding: 12, borderRadius: 10, border: `1px solid ${COLOR.border}`, background: '#0b1220', color: COLOR.white },
-  footer: { borderTop: `1px solid ${COLOR.border}`, background: '#0b0f19' }
+function Container({ children, style }) {
+  return <div style={{ maxWidth: 1080, margin: '0 auto', padding: '0 24px', ...style }}>{children}</div>
 }
+
+function Card({ children, style }) {
+  return <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 16, padding: 24, boxShadow: '0 6px 24px rgba(0,0,0,0.06)', ...style }}>{children}</div>
+}
+
+function PrimaryButton({ children, onClick, href }) {
+  const base = { background: 'linear-gradient(90deg,#22c55e,#16a34a)', color: '#fff', padding: '14px 22px', borderRadius: 10, fontWeight: 600, textDecoration: 'none', display: 'inline-block', boxShadow: '0 4px 14px rgba(0,0,0,0.1)' }
+  if (href) return <a href={href} style={base}>{text(children)}</a>
+  return <button type="button" onClick={onClick} style={base}>{text(children)}</button>
+}
+
+const listReset = { listStyle: 'none', margin: 0, padding: 0 }
 
 export default function LandingPage() {
-  const [status, setStatus] = useState('idle')
-  const currentYear = new Date().getFullYear()
+  const nav = useMemo(() => ([
+    { label: 'How', href: '#how' },
+    { label: 'Use cases', href: '#use-cases' },
+    { label: 'Pricing', href: '#pricing' },
+    { label: 'FAQ', href: '#faq' },
+    { label: 'Contact', href: '#contact' },
+  ]), [])
 
-  useEffect(() => {
-    document.title = `${BRAND} — AI Business Optimization`
-    const favicon = document.createElement('link')
-    favicon.rel = 'icon'
-    favicon.href = '/favicon.ico'
-    document.head.appendChild(favicon)
+  const valueProps = useMemo(() => ([
+    { t: 'Do more with less', d: 'Streamline operations so your team achieves more without extra hires.' },
+    { t: 'Grow your business', d: 'Free up capacity to launch new services, win more clients, and scale impact.' },
+    { t: 'Prove the ROI', d: 'Clear metrics so you see cost savings and revenue gains from automation.' },
+  ]), [])
 
-    const smoke = [
-      ['has root', !!document.getElementById('root')],
-      ['has nav', !!document.querySelector('nav')],
-      ['has contact form', !!document.querySelector('form[name="contact"]')],
-      ['shows current year', document.body.textContent?.includes(String(new Date().getFullYear()))]
-    ]
-    console.groupCollapsed('ModeOps smoke tests')
-    smoke.forEach(([name, pass]) => console.log(`${pass ? '✅' : '❌'} ${name}`))
-    console.groupEnd()
-  }, [])
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-    const form = e.currentTarget
-
-    if (form.elements.namedItem('company_website')?.value) return
-
-    const name = form.elements.namedItem('name')?.value || ''
-    const email = form.elements.namedItem('email')?.value || ''
-    const company = form.elements.namedItem('company')?.value || ''
-    const message = form.elements.namedItem('message')?.value || ''
-
-    if (FORMSPREE_FORM_ID) {
-      try {
-        setStatus('sending')
-        const res = await fetch(`https://formspree.io/f/${FORMSPREE_FORM_ID}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-          body: JSON.stringify({ name, email, company, message })
-        })
-        if (res.ok) { setStatus('success'); form.reset(); return }
-        throw new Error(`Formspree error ${res.status}`)
-      } catch (err) {
-        console.error(err); setStatus('error'); return
-      }
-    }
-
-    const subject = encodeURIComponent(`[${BRAND}] New inquiry from ${name}`)
-    const body = encodeURIComponent(`Name: ${name}
-Work email: ${email}
-Company / website: ${company}
-
-Workflow to improve:
-${message}`)
-    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`
-  }
+  const faq = useMemo(() => ([
+    ['How soon can we start?', 'Within a week after the assessment.'],
+    ['Do you work with nonprofits?', 'Yes — many of our clients are mission‑driven orgs.'],
+    ['What about government teams?', 'We adapt to public sector compliance and procurement needs.'],
+    ['Do we need technical staff?', 'No. We handle the setup and training so your team can focus on delivery.'],
+  ]), [])
 
   return (
-    <div style={styles.page}>
-      <header style={styles.header}>
-        <div style={{...styles.container, ...styles.headerInner}}>
-          <div style={{display:'flex', alignItems:'center', gap:10}}>
-            <img src="/modeops-logo.png" alt="ModeOps" onError={(e)=>{e.currentTarget.src='/modeops-logo.svg'}} style={{height:28}} />
-            <strong style={{letterSpacing:'-.02em'}}>ModeOps</strong>
-          </div>
-          <nav style={styles.nav}>
-            <a href="#services" style={styles.navLink}>Services</a>
-            <a href="#who" style={styles.navLink}>Who we help</a>
-            <a href="#results" style={styles.navLink}>Results</a>
-            <a href="#pricing" style={styles.navLink}>Pricing</a>
-            <a href="#faq" style={styles.navLink}>FAQ</a>
-            <a href="#contact" style={{...styles.navLink, color: COLOR.accentSoft}}>Contact</a>
+    <div style={{ background: '#f8fafc', color: '#0f172a', minHeight: '100vh' }}>
+      <style>{`
+        .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+        @media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } .grid-2 { grid-template-columns: 1fr; } }
+        a { color: inherit }
+        .divider { height: 2px; background: linear-gradient(90deg,#22c55e33,transparent); margin: 48px 0; }
+        .mockup { background: #e2e8f0; border: 1px dashed #94a3b8; border-radius: 12px; height: 240px; display: flex; align-items: center; justify-content: center; color: #475569; font-size: 14px; }
+      `}</style>
+
+      <header style={{ position: 'sticky', top: 0, zIndex: 10, background: '#f8fafc', borderBottom: '1px solid #e5e7eb' }}>
+        <Container style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
+          <div style={{ fontWeight: 800 }}>ModeOps</div>
+          <nav style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            {nav.map((item) => (<a key={item.href} href={item.href}>{text(item.label)}</a>))}
           </nav>
-        </div>
+        </Container>
       </header>
 
-      {/* ===== HERO ===== */}
-      <section style={{...styles.container, ...styles.hero}}>
-        <div>
-          <span style={styles.badge}><Sparkles size={14}/> AI business optimization</span>
-          <h1 style={styles.h1}>Streamline messy workflows. Ship automation that sticks.</h1>
-          <p style={styles.sub}>We turn high‑friction processes into elegant, measurable systems — fast wins in 2–4 weeks, then scale with confidence.</p>
-          <div style={styles.ctaRow}>
-            <a href="#contact" style={styles.btnPrimary}>Book a free consult <ArrowRight size={18}/></a>
-            <a href="#services" style={styles.btnGhost}>See services</a>
-          </div>
-          <ul style={{marginTop: 16, color: COLOR.textMuted, display:'grid', gap:6}}>
-            <li style={{display:'flex', alignItems:'center', gap:8}}><CheckCircle2 size={18}/> Measurable ROI in weeks</li>
-            <li style={{display:'flex', alignItems:'center', gap:8}}><CheckCircle2 size={18}/> Your tools, your data, your control</li>
-            <li style={{display:'flex', alignItems:'center', gap:8}}><CheckCircle2 size={18}/> Clear documentation & handover</li>
-          </ul>
-        </div>
-
-        <motion.div style={styles.heroCard} initial={{opacity:0, y:8}} animate={{opacity:1, y:0}} transition={{duration: .4}}>
-          <h3 style={{marginTop:0}}>Quick wins we implement</h3>
-          <div style={{display:'grid', gap:10}}>
-            <div style={styles.pill}><Sparkles size={18}/> Email triage & response drafting</div>
-            <div style={styles.pill}><Wrench size={18}/> SOP extraction & guided checklists</div>
-            <div style={styles.pill}><Rocket size={18}/> Rebate/claims workflow automation</div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ===== SERVICES ===== */}
-      <section style={styles.sectionMuted} id="services">
-        <div style={{...styles.container}}>
-          <div style={styles.grid3}>
-            {[{icon: <Gauge size={18}/>, title: 'Discovery & pilot', text: 'Pick a target workflow and ship a 2–4 week pilot with baseline metrics.'},
-              {icon: <Workflow size={18}/>, title: 'Automation build', text: 'Integrate email, Sheets, CRMs and remove repetitive handoffs.'},
-              {icon: <Shield size={18}/>, title: 'Scale & handover', text: 'Train your team, provide docs, and you own the system.'}
-            ].map((c,i)=> (
-              <div key={i} style={styles.card}>
-                <div style={{display:'flex', alignItems:'center', gap:8, fontWeight:700}}>{c.icon} {c.title}</div>
-                <p style={{color: COLOR.textMuted, marginTop:8}}>{c.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== WHO WE HELP ===== */}
-      <section id="who">
-        <div style={{...styles.container, padding: '28px 0'}}>
-          <h2 style={{margin:'0 0 12px'}}>Who we help</h2>
-          <div style={styles.grid3}>
-            {[{icon:<Building2 size={18}/>, title:'Ops-led SMBs', text:'20–300 employees with manual, email-driven workflows.'},
-              {icon:<Briefcase size={18}/>, title:'Professional services', text:'Consulting, energy, rebates, legal ops, finance ops.'},
-              {icon:<ClipboardCheck size={18}/>, title:'Compliance-heavy teams', text:'Document review, approvals, evidence capture.'}
-            ].map((c, i) => (
-              <div key={i} style={styles.card}>
-                <div style={{display:'flex', alignItems:'center', gap:8, fontWeight:700}}>{c.icon} {c.title}</div>
-                <p style={{color: COLOR.textMuted, marginTop:8}}>{c.text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ===== RESULTS / CASE STUDY ===== */}
-      <section id="results" style={styles.sectionMuted}>
-        <div style={{...styles.container, padding: '28px 0'}}>
-          <h2 style={{margin:'0 0 12px'}}>Results you can measure</h2>
-          <div style={styles.grid2}>
-            <div style={styles.card}>
-              <h3 style={{marginTop:0}}>Case study: Rebate ops</h3>
-              <p style={{color: COLOR.textMuted}}>Custom PFS flow redesigned. We automated intake, document QA, and reviewer checklists.</p>
-              <ul style={{display:'grid', gap:8, marginTop:12}}>
-                <li style={{display:'flex', gap:8, alignItems:'center'}}><BarChart3 size={18}/> 46% faster cycle time (pilot, 6 weeks)</li>
-                <li style={{display:'flex', gap:8, alignItems:'center'}}><BarChart3 size={18}/> 0→1 reviewer errors caught by checklist prompts</li>
-                <li style={{display:'flex', gap:8, alignItems:'center'}}><BarChart3 size={18}/> ~8 hrs/week saved on status updates</li>
-              </ul>
+      <Section id="hero" style={{ padding: '120px 0 80px', background: 'linear-gradient(135deg,#f0fdf4,#dcfce7)' }}>
+        <Container>
+          <div style={{ display: 'grid', gap: 24, textAlign: 'center' }}>
+            <h1 style={{ fontSize: 48, lineHeight: 1.1, margin: 0 }}>{text('Work smarter. Save money. Grow faster.')}</h1>
+            <p style={{ fontSize: 20, maxWidth: 760, margin: '0 auto' }}>{text('ModeOps helps small businesses, nonprofits, and government teams run more efficiently — and use those gains to grow revenue, serve more people, and stay competitive.')}</p>
+            <div style={{ display: 'flex', gap: 12, marginTop: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
+              <PrimaryButton href="#contact">Book a free consultation</PrimaryButton>
+              <a href="#how" style={{ padding: '14px 22px' }}>How it works</a>
             </div>
-            <div style={styles.card}>
-              <blockquote style={{margin:0, color: COLOR.textMuted}}>
-                <Quote size={20}/>
-                “ModeOps took a messy, multi‑team process and made it click. The team finally trusts the workflow.”
-                <div style={{marginTop:8, color: COLOR.text}}><strong>Director of Operations</strong> — Energy Services</div>
-              </blockquote>
-            </div>
+            <div className="mockup">[ Screenshot / Dashboard preview ]</div>
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
-      {/* ===== PROCESS ===== */}
-      <section id="process">
-        <div style={{...styles.container, padding: '28px 0'}}>
-          <h2 style={{margin:'0 0 12px'}}>Our process</h2>
-          <ol style={{display:'grid', gap:10, listStyle:'none', padding:0}}>
-            {[ 'Stakeholder interview & quick-win mapping', 'Pilot build with weekly checkpoints', 'Launch, train, document, handover' ].map((step, i) => (
-              <li key={i} style={{...styles.card, display:'flex', gap:12, alignItems:'center'}}>
-                <span style={{display:'inline-grid', placeItems:'center', height:28, width:28, borderRadius:999, background: COLOR.accent, color:'#111827', fontWeight:800}}>{i+1}</span>
-                <span>{step}</span>
-              </li>
+      <Section>
+        <Container>
+          <div className="grid-3">
+            {valueProps.map((vp, i) => (
+              <Card key={vp.t}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>✨</div>
+                <h3 style={{ marginTop: 0 }}>{text(vp.t)}</h3>
+                <p style={{ marginBottom: 0 }}>{text(vp.d)}</p>
+              </Card>
             ))}
-          </ol>
-        </div>
-      </section>
+          </div>
+        </Container>
+      </Section>
 
-      {/* ===== PRICING ===== */}
-      <section id="pricing" style={styles.sectionMuted}>
-        <div style={{...styles.container, padding: '28px 0'}}>
-          <h2 style={{margin:'0 0 12px'}}>Pricing</h2>
-          <div style={styles.grid3}>
+      <div className="divider" />
+
+      <Section id="how">
+        <Container>
+          <h2 style={{ marginTop: 0, textAlign: 'center' }}>How we work</h2>
+          <div className="grid-3">
             {[
-              {name:'Pilot', price:'$3,500', desc:'2–4 week sprint, 1 workflow', bullets:['Discovery workshop','Pilot build & metrics','Team training & doc']},
-              {name:'Build', price:'$8,500', desc:'4–6 weeks, 2–3 workflows', bullets:['Integrations & automations','Analytics & QA prompts','Playbooks & enablement']},
-              {name:'Scale', price:'Custom', desc:'Roadmap & ownership', bullets:['Roadmap & governance','Shadow‑IT hardening','Handover & support']}
-            ].map((tier, i) => (
-              <div key={i} style={{...styles.card, display:'grid', gap:10}}>
-                <div style={{display:'flex', justifyContent:'space-between', alignItems:'baseline'}}>
-                  <h3 style={{margin:0}}>{tier.name}</h3>
-                  <div style={{fontWeight:800, color: COLOR.accent}}>{tier.price}</div>
-                </div>
-                <p style={{color: COLOR.textMuted, marginTop:-4}}>{tier.desc}</p>
-                <ul style={{display:'grid', gap:6, margin:0, paddingLeft:18}}>
-                  {tier.bullets.map((b, j) => <li key={j}>{b}</li>)}
-                </ul>
-                <a href="#contact" style={{...styles.btnPrimary, justifyContent:'center'}}>Get started</a>
-              </div>
+              ['Assess', 'Quick session to understand your workflow and growth goals.'],
+              ['Prototype', 'We build a simple automation or copilot in 1–2 weeks.'],
+              ['Measure impact', 'We check both efficiency gains and new growth capacity.'],
+            ].map(([t, d], i) => (
+              <Card key={t}>
+                <div style={{ fontSize: 32, marginBottom: 12 }}>🔹</div>
+                <h3 style={{ marginTop: 0 }}>{text(t)}</h3>
+                <p style={{ marginBottom: 0 }}>{text(d)}</p>
+              </Card>
             ))}
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
-      {/* ===== FAQ ===== */}
-      <section id="faq">
-        <div style={{...styles.container, padding: '28px 0'}}>
-          <h2 style={{margin:'0 0 12px'}}>FAQ</h2>
-          <div style={{display:'grid', gap:12}}>
-            {[
-              ['How fast can we start?', 'We typically begin within a week. Pilots ship in 2–4 weeks with clear metrics.'],
-              ['Do you use our tools or bring new ones?', 'We prefer your stack first (email, Google/Microsoft, CRM). Where helpful, we add lightweight glue.'],
-              ['Security & data handling?', 'We work inside your tenant where possible, follow least‑privilege access, and document data flows.'],
-              ['What does success look like?', 'Cycle time down, error rates down, and fewer handoffs. You own the final system and documentation.']
-            ].map(([q,a], i) => (
-              <div key={i} style={styles.card}>
-                <strong>{q}</strong>
-                <p style={{color: COLOR.textMuted, marginTop:8}}>{a}</p>
-              </div>
+      <div className="divider" />
+
+      <Section id="use-cases">
+        <Container>
+          <h2 style={{ textAlign: 'center' }}>Use cases</h2>
+          <div className="grid-2" style={{ alignItems: 'center' }}>
+            <ul style={listReset}>
+              {[
+                '📥 Intake forms that auto‑sort and route',
+                '📝 Document review & error checks',
+                '🤝 Volunteer / client onboarding workflows',
+                '📊 Dashboards & alerts for program metrics',
+                '🚀 Freeing up staff to focus on business growth and community impact',
+              ].map((x) => (<li key={x} style={{ padding: '12px 0', borderBottom: '1px dashed #e5e7eb', fontSize: 18 }}>{text(x)}</li>))}
+            </ul>
+            <div className="mockup">[ Example Workflow Mockup ]</div>
+          </div>
+        </Container>
+      </Section>
+
+      <div className="divider" />
+
+      <Section id="pricing">
+        <Container>
+          <h2 style={{ textAlign: 'center' }}>Pricing</h2>
+          <div className="grid-3">
+            <Card>
+              <h3 style={{ marginTop: 0 }}>Free Consultation</h3>
+              <p>30–60 minutes. We learn your needs and suggest first steps.</p>
+              <PrimaryButton href="#contact">Book now</PrimaryButton>
+            </Card>
+            <Card>
+              <h3 style={{ marginTop: 0 }}>Pilot — $3,500 flat</h3>
+              <p>2–3 weeks. One workflow automated, clear success metric, weekly check‑ins.</p>
+              <PrimaryButton href="#contact">Start pilot</PrimaryButton>
+            </Card>
+            <Card>
+              <h3 style={{ marginTop: 0 }}>Ongoing — from $2,000/mo</h3>
+              <p>Continuous improvements, monitoring, and support for new use cases.</p>
+              <PrimaryButton href="#contact">Talk to us</PrimaryButton>
+            </Card>
+          </div>
+        </Container>
+      </Section>
+
+      <div className="divider" />
+
+      <Section id="faq">
+        <Container>
+          <h2 style={{ textAlign: 'center' }}>FAQ</h2>
+          <div className="grid-2">
+            {faq.map(([q, a]) => (
+              <Card key={q}>
+                <strong>{text(q)}</strong>
+                <p style={{ marginBottom: 0 }}>{text(a)}</p>
+              </Card>
             ))}
           </div>
-        </div>
-      </section>
+        </Container>
+      </Section>
 
-      {/* ===== CONTACT ===== */}
-      <section id="contact" style={styles.contact}>
-        <div style={{...styles.container, maxWidth: 900}}>
-          <h2 style={{marginTop:0}}>Book a free consultation</h2>
-          <p style={{color: COLOR.textMuted}}>Tell us about the workflow you want to improve. We’ll reply within one business day.</p>
-          <form onSubmit={handleSubmit} name="contact" method="POST" style={{display:'grid', gap:14, marginTop: 14}}>
-            <div style={{display:'grid', gap:6}}>
-              <span style={styles.label}>Name</span>
-              <input name="name" placeholder="Your name" required style={styles.input}/>
-            </div>
-            <div style={{display:'grid', gap:6}}>
-              <span style={styles.label}>Work email</span>
-              <input name="email" type="email" placeholder="name@company.com" required style={styles.input}/>
-            </div>
-            <div style={{display:'grid', gap:6}}>
-              <span style={styles.label}>Company / website</span>
-              <input name="company" placeholder="Acme Co or acme.com" style={styles.input}/>
-            </div>
-            <input name="company_website" tabIndex={-1} autoComplete="off" style={{display:'none'}}/>
-            <div style={{display:'grid', gap:6}}>
-              <span style={styles.label}>What’s the workflow to improve?</span>
-              <textarea name="message" rows={4} placeholder="e.g., rebate application review has 6 handoffs..." style={styles.textarea}/>
-            </div>
-            <button type="submit" disabled={status === 'sending'} style={{...styles.btnPrimary}}>
-              {status === 'sending' ? 'Sending…' : 'Submit inquiry'}
-            </button>
-            {status === 'success' && <div role="status" style={{color:'#86efac'}}>Thanks! We received your message and will reply shortly.</div>}
-            {status === 'error' && <div role="alert" style={{color:'#fda4af'}}>Something went wrong. Email us at <a href={`mailto:${CONTACT_EMAIL}`} style={{color: COLOR.white, textDecoration:'underline'}}>{CONTACT_EMAIL}</a>.</div>}
-          </form>
-        </div>
-      </section>
+      <Section id="contact" style={{ background: '#fff' }}>
+        <Container>
+          <h2 style={{ marginTop: 0, textAlign: 'center' }}>Let’s talk</h2>
+          <Card><ContactForm /></Card>
+        </Container>
+      </Section>
 
-      {/* ===== FOOTER ===== */}
-      <footer style={styles.footer}>
-        <div style={{...styles.container, padding:'22px 0', display:'flex', justifyContent:'space-between', color: COLOR.textMuted}}>
-          <div>© {currentYear} {BRAND}</div>
-          <div style={{display:'flex', gap:12}}>
-            <a href="#privacy" style={{color: COLOR.textMuted, textDecoration:'none'}}>Privacy</a>
-            <a href="#terms" style={{color: COLOR.textMuted, textDecoration:'none'}}>Terms</a>
+      <footer style={{ borderTop: '1px solid #e5e7eb', padding: '24px 0', background: '#f8fafc' }}>
+        <Container style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, flexWrap: 'wrap', gap: 12 }}>
+          <div>© {new Date().getFullYear()} ModeOps</div>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <a href="#">Privacy</a>
+            <a href="#">Terms</a>
           </div>
-        </div>
+        </Container>
       </footer>
     </div>
   )
 }
+
+function ContactForm() {
+  const [state, setState] = useState({ name: '', email: '', message: '' })
+  const [sent, setSent] = useState(false)
+  const [error, setError] = useState('')
+
+  async function onSubmit(e) {
+    e.preventDefault()
+    setError('')
+    try {
+      const res = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ name: text(state.name), email: text(state.email), message: text(state.message) }),
+      })
+      if (!res.ok) throw new Error('Form submission failed')
+      setSent(true)
+    } catch (err) {
+      setError(err?.message ? text(err.message) : 'Something went wrong')
+    }
+  }
+
+  if (sent) return <p>Thanks! We’ll be in touch within 1 business day.</p>
+
+  return (
+    <form onSubmit={onSubmit} style={{ display: 'grid', gap: 12 }}>
+      <label>
+        <div style={{ marginBottom: 6 }}>Name</div>
+        <input required value={state.name} onChange={(e) => setState((s) => ({ ...s, name: e.target.value }))} style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e5e7eb' }} />
+      </label>
+      <label>
+        <div style={{ marginBottom: 6 }}>Email</div>
+        <input type="email" required value={state.email} onChange={(e) => setState((s) => ({ ...s, email: e.target.value }))} style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e5e7eb' }} />
+      </label>
+      <label>
+        <div style={{ marginBottom: 6 }}>What would you like to improve?</div>
+        <textarea required rows={5} value={state.message} onChange={(e) => setState((s) => ({ ...s, message: e.target.value }))} style={{ width: '100%', padding: 12, borderRadius: 10, border: '1px solid #e5e7eb' }} />
+      </label>
+      {error && <div role="alert" style={{ color: 'crimson' }}>{text(error)}</div>}
+      <div><PrimaryButton>Send</PrimaryButton></div>
+    </form>
+  )
+}
+
